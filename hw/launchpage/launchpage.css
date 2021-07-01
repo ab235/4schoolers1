@@ -1,0 +1,26 @@
+body{
+	background-image: url('https://i.kym-cdn.com/entries/icons/facebook/000/028/021/work.jpg');
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+.box{
+	background-color: cadetblue;
+	width: 200px;
+	height: 100px;
+	text-align: center;
+	border-style: solid;
+  	border-width: 50px;
+  	border-color: cadetblue;
+}
+.boxvert{
+	background-color: cadetblue;
+	width: 100px;
+	height: 200px;
+	text-align: center;
+	border-style: solid;
+  	border-width: 50px;
+  	border-color: cadetblue;
+}
+h1{
+	text-align:center;
+}
