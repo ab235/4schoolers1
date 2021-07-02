@@ -1,26 +1,26 @@
 import sys
 
 def main():
-    args = sys.argv
+    args = list(map(int,sys.argv[3:]))
     area = 0
     perimeter = 0
-    if (args[2] == "triangle"):
-        s = sum(args[3:])
-        a = args[3]
-        b = args[4]
-        c = args[5]
+    if (sys.argv[2] == "triangle"):
+        s = sum(args)/2
+        a = args[0]
+        b = args[1]
+        c = args[2]
         area = ((s)*(s-a)*(s-b)*(s-c))**0.5
         perimeter = a + b + c
-    elif (args[2] == "circle"):
-        r = args[3]
+    elif (sys.argv[2] == "circle"):
+        r = args[0]
         area = 3.14159 * r * r
         perimeter = 3.14159 * 2 * r
     else:
-        a = args[3]
-        b = args[4]
+        a = args[0]
+        b = args[1]
         area = a*b
         perimeter = 2*a + 2*b
-    if (args[1] == "area"):
+    if (sys.argv[1] == "area"):
         print("Area: " + str(area))
     else:
         print("Perimeter: " + str(perimeter))
