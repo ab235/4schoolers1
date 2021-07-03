@@ -2,6 +2,8 @@ import csv
 import main
 import dashboard
 
+
+
 def main():
     data = []
     with open('users.csv') as file:
@@ -18,7 +20,7 @@ def main():
             if (pswrd == data[1][dex]):
                 print("Login successful. Transferring to dashboard...")
                 dashboard.main(dex)
-                
+                return dex
             else:
                 ans = input("Login unsuccessful. Press q to quit or any other key to try again. ")
                 if (ans == 'q'):
@@ -27,7 +29,7 @@ def main():
                     main()
         else:
             print("Username not in database. Please register and try again. Transferring you back to home page...")
-            master.main()
-
+            main.main()
+            
 if __name__ == '__main__':
     main()
