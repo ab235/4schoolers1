@@ -12,6 +12,7 @@ def main():
             data.append(row)
     uname = input("Please enter your username: ")
     pswrd = input("Please enter your password: ")
+    entry = False
     if (len(data) == 0):
         print("Database empty.")
     else:
@@ -20,7 +21,7 @@ def main():
             if (pswrd == data[1][dex]):
                 print("Login successful. Transferring to dashboard...")
                 dashboard.main(dex)
-                return dex
+                entry = True
             else:
                 ans = input("Login unsuccessful. Press q to quit or any other key to try again. ")
                 if (ans == 'q'):
@@ -28,8 +29,7 @@ def main():
                 else:
                     main()
         else:
-            print("Username not in database. Please register and try again. Transferring you back to home page...")
-            main.main()
-            
+            print("Username not in database. Please register and try again.")
+    return [uname, pswrd, data[2][dex], dex, entry]
 if __name__ == '__main__':
     main()

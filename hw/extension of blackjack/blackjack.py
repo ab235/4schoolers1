@@ -64,6 +64,7 @@ class Game:
         self.deck = Deck()
         self.player = player
         self.player.cards = []
+        self.player.money = int(self.player.money)
         self.player.money -= 100
         self.deck.shuffle()
         print(' Welcome to the game! ')
