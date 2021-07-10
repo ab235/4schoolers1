@@ -19,6 +19,7 @@ def main():
     if (answer == 'register'):
         register.main()
     loginlist = list(login.main())
+    print(loginlist[4])
     if (loginlist[4]):
         player = Player(loginlist[0])
         player.money = loginlist[2]
@@ -28,14 +29,9 @@ def main():
             ans = input("Please enter 'y' or 'n' for yes or no, respectively. ")
         if ans == 'y':
             print("Friends: " + str(dashboard.view_friends(loginlist[3])))
-        ans = input("Would you like to add a friend? (y/n): ")
-        while (ans != 'y' and ans != 'n'):
-            ans = input("Please enter 'y' or 'n' for yes or no, respectively. ")
-        if ans == 'y':
-            dashboard.add_friend(loginlist[3])
         ans = 'y'
         while (ans != 'n'):
-            ans = input("Would you like to add another friend? (y/n): ")
+            ans = input("Would you like to add a friend? (y/n): ")
             while (ans != 'y' and ans != 'n'):
                 ans = input("Please enter 'y' or 'n' for yes or no, respectively. ")
             if ans == 'y':

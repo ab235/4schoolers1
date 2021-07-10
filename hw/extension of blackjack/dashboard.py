@@ -16,7 +16,7 @@ def add_friend(index):
     ans = input("Please enter the username of your friend: ")
     while (ans not in data[0] and ans not in friends[1][index]):
         ans = input("Please enter a non-friended username: ")
-    friends[1][index] += [ans]
+    friends[1][index].append([ans])
     with open('friends.csv', 'w') as file:
         csv_writer = csv.writer(file, delimiter = ',')
         for row in range(len(list(friends))):
@@ -72,6 +72,11 @@ def main(index):
             friends.append(row)
     if (len(friends) < 2):
         friends = [data[0], [[] for x in range(len(data[0]))]]
+    ans = input ("Would you like to view your money? (y/n): ")
+    while (ans != 'y' and ans != 'n'):
+        ans = input("Please enter 'y' or 'n' for yes or no, respectively. ")
+    if ans == 'y':
+        print("Money: " + str(data[2][index]))
     ans = input("Would you like to deposit money? (y/n): ")
     while (ans != 'y' and ans != 'n'):
         ans = input("Please enter 'y' or 'n' for yes or no, respectively. ")
@@ -81,6 +86,7 @@ def main(index):
             ans = int(input("Please enter a positive integer: "))
         data[2][index] = int(data[2][index])
         data[2][index] += ans
+        print("You now have: " + str(data[2][index]))
     ans = input("Would you like to withdraw money? (y/n): ")
     while (ans != 'y' and ans != 'n'):
         ans = input("Please enter 'y' or 'n' for yes or no, respectively. ")
@@ -90,6 +96,7 @@ def main(index):
             ans = int(input("Please enter a positive integer: "))
         data[2][index] = int(data[2][index])
         data[2][index] -= ans
+        print("You now have: " + str(data[2][index]))
     ans = input("Would you like to change your password? (y/n): ")
     while (ans != 'y' and ans != 'n'):
         ans = input("Please enter 'y' or 'n' for yes or no, respectively. ")

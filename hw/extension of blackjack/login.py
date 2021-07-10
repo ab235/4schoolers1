@@ -28,8 +28,9 @@ def main():
                     print("Good day.")
                 else:
                     main()
+            return [uname, pswrd, data[2][dex], dex, entry]
         else:
             print("Username not in database. Please register and try again.")
-    return [uname, pswrd, data[2][dex], dex, entry]
+    return [0, 0, 0, 0, entry]
 if __name__ == '__main__':
     main()
