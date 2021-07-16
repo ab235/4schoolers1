@@ -2,10 +2,10 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import csv
 from user import User
 from blackjack import Card, Deck, Player, Game
-import pickle
 app = Flask(__name__)
 app.secret_key = 'dfghjiouhgyfvhbjaknsdasidnasiodn'
-
+player = Player('none')
+game = Game(player)
 @app.route('/', methods = ['GET', 'POST'])
 def index():
     if (request.form.get("Register")):
@@ -103,42 +103,47 @@ def blackjack(username):
     user = User.get_user(username, 'users.csv')
     user.money = float(user.money)
     next_card = True
-    player = Player(username)
-    if (user.money > 300):
-        user.update('users.csv')
-        game = Game(player)
-        message += game.turn() + "<br>"
+    player.name = username
+    if (user.money >= 300):
         message += 'Do you want to take a card: <br>'
         if (request.form.get("exit")):
-            return redirect(url_for('end_game', username = username, player = pickle.dumps(player), game = pickle.dumps(game), message = message))
+            return redirect(url_for('end_game', username = username, message = message))
         if (request.form.get("next")):
-            return redirect(url_for('catch1', username = username, player = pickle.dumps(player), game = pickle.dumps(game), message = message))
+            message += game.turn() + "<br>"
+            return redirect(url_for('catch1', username = username, message = message))
+    else:
+        message = "You don't have enough funds."
+        if (request.form.get("exit")):
+            return redirect(url_for('dashboard', username = username))
     return render_template('blackjack.jinja', user = str(user), message = message)
-@app.route('/catch1/<username>/<player>/<game>/<message>', methods = ['GET', 'POST'])
-def catch1(username, player, game, message):
-    game = pickle.loads(game)
-    player = pickle.loads(player)
-    message += game.turn() + "<br>"
-    message += 'Do you want to take a card: <br>'
-    if (request.form.get("exit")):
-        return redirect(url_for('end_game', username = username, player = pickle.dumps(player), game = pickle.dumps(game), message = message))
-    elif (request.form.get("next")):
-        return redirect(url_for('catch1', username = username, player = pickle.dumps(player), game = pickle.dumps(game), message = message))
+@app.route('/catch1/<username>/<message>', methods = ['GET', 'POST'])
+def catch1(username, message):
+    if (not game.game_over()):
+        user = User.get_user(username, 'users.csv')
+        message += 'Do you want to take a card: <br>'
+        if (request.form.get("exit")):
+            return redirect(url_for('end_game', username = username, message = message))
+        elif (request.form.get("next")):
+            message += game.turn() + "<br>"
+            return redirect(url_for('catch1', username = username, message = message))
+    else:
+        return redirect(url_for('end_game', username = username, message = message))
     return render_template('blackjack.jinja', user = str(user), message = message)
-@app.route('/end_game/<username>/<player>/<game>/<message>', methods = ['GET', 'POST'])
-def end_game(username, player, game, message):
-    game = pickle.loads(game)
-    player = pickle.loads(player)
+@app.route('/end_game/<username>/<message>', methods = ['GET', 'POST'])
+def end_game(username, message):
     payoff = game.stop()
     message += 'You won: $' + str(payoff) + '<br>'
     user = User.get_user(username, 'users.csv')
+    user.money = float(user.money)
     user.money += payoff - 100
     user.update('users.csv')
+    player.cards = []
+    game.__init__(player)
     message += ('do you want to play another game: <br>')
     if (request.form.get("exit")):
-        return redirect(url_for('dashboard/<username>', username = username))
+        return redirect(url_for('dashboard', username = username))
     elif (request.form.get("next")):
-        return redirect(url_for('blackjack/<username>', username = username))
+        return redirect(url_for('blackjack', username = username))
     return render_template('blackjack.jinja', user = str(user), message = message)
 if __name__ == '__main__':
    app.run()
