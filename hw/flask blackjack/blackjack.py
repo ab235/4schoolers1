@@ -6,7 +6,7 @@ class Card:
         self.type = type
     
     def __str__(self):
-        signs = '♠♥♣♦'
+        signs = 'SHCD'
         card = str(self.value)
         if self.value == 1:
             card = 'A'
@@ -19,7 +19,7 @@ class Card:
 
         return card+signs[self.type]
     def __repr__(self):
-        signs = '♠♥♣♦'
+        signs = 'SHCD'
         card = str(self.value)
         if self.value == 1:
             card = 'A'
@@ -52,20 +52,25 @@ class Player:
         self.name = name
         self.cards = []
         self.money = 0
-    
-    def get_sum(self):
-        return sum([card.value for card in self.cards])
+        self.value = 0
 
     def add_card(self, card):
         self.cards.append(card)
+        self.value += card.value
+
+    def add_str_card(self, card, cards):
+        cards.append(str(card))
+        print(cards)
+        self.cards.append(card)
+        self.value += card.value
+    def get_sum(self):
+        return sum([x.value for x in self.cards])
 
 class Game:
     def __init__(self, player):
         self.deck = Deck()
         self.player = player
         self.player.cards = []
-        self.player.money = int(self.player.money)
-        self.player.money -= 100
         self.deck.shuffle()
 
 
@@ -73,13 +78,13 @@ class Game:
         card = self.deck.deal()
         self.player.add_card(card)
 
-        return (self.player.cards)
-        
+        return 'Your cards: ' + str(self.player.cards)
     def game_over(self):
         if (self.player.get_sum() > 21):
-            return False
-        elif (self.player.get_sum() <= 21):
             return True
+        elif (self.player.get_sum() <= 21):
+            return False
+    
     def stop(self):
         s = self.player.get_sum()
         payoff = 0

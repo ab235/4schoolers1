@@ -19,7 +19,6 @@ def main():
     if (answer == 'register'):
         register.main()
     loginlist = list(login.main())
-    print(loginlist[4])
     if (loginlist[4]):
         player = Player(loginlist[0])
         player.money = loginlist[2]

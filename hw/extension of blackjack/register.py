@@ -30,6 +30,7 @@ def main():
             data[1].append(pswrd)
             data[2].append(int(0))
             friends[0].append(uname)
+            print(uname)
             friends[1].append([])
         else:
             print("Passwords do not match!")
@@ -37,5 +38,9 @@ def main():
         csv_writer = csv.writer(file, delimiter = ',')
         for row in range(len(data)):
             csv_writer.writerow(data[row])
+    with open('friends.csv', 'w') as file:
+        csv_writer = csv.writer(file, delimiter = ',')
+        for row in range(len(friends)):
+            csv_writer.writerow(friends[row])
 if __name__ == '__main__':
     main()

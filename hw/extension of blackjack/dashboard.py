@@ -16,6 +16,7 @@ def add_friend(index):
     ans = input("Please enter the username of your friend: ")
     while (ans not in data[0] and ans not in friends[1][index]):
         ans = input("Please enter a non-friended username: ")
+    print(type(friends[1][index]))
     friends[1][index].append([ans])
     with open('friends.csv', 'w') as file:
         csv_writer = csv.writer(file, delimiter = ',')

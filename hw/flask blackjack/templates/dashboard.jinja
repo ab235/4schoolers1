@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>Dashboard</title>
+    </head>
+    <body>
+        <h1>Dashboard</h1>
+        <p>
+            {{user}}
+        </p>
+        <p>
+            Deposit money below:
+        </p>
+        <form method = "post" id = "deposit" name = "deposit">
+            <input type = "text" id = "amount" name = "amount">
+            <input type = "submit" name = "deposit" value = "Deposit">
+        </form>
+        <p>
+            Withdraw money below:
+        </p>
+        <form method = "post" id = "withdraw" name = "withdraw">
+            <input type = "text" id = "amount" name = "amount">
+            <input type = "submit" name = "withdraw" value = "Withdraw">
+        </form>
+        <p>
+            Change password below:
+        </p>
+        <form method = "post" id = "cpass" name = "change_password">
+            <input type = "password" id = "newp" name = "new_password">
+            <input type = "password" id = "cp" name = "confirm_password">
+            <input type = "submit" name = "change_password" value = "New Password">
+        </form>
+        <p>
+            {{message}}
+            <br><br><br><br><br><br>
+            Would you like to play a game of blackjack?
+            <form method = "post" id = "play" name = "play">
+                <input type = "submit" name = "play" value = "Play">
+            </form>
+        </p>
+    </body>
+</html>
