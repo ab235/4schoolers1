@@ -8,14 +8,14 @@ player = Player('none')
 game = Game(player)
 @app.route('/', methods = ['GET', 'POST'])
 def index():
-    if (request.form.get("Register")):
-        return redirect(url_for('register'))
-    elif (request.form.get("Login")):
-        return redirect(url_for('login'))
+    #if (request.form.get("Register")):
+        #return redirect(url_for('register'))
+    #elif (request.form.get("Login")):
+        #return redirect(url_for('login'))
     return render_template('index.jinja')
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
-    message = ""
+    message = "Register"
     if (request.method == 'POST'):
         username = request.form.get('username')
         password = request.form.get('password')
@@ -39,7 +39,7 @@ def register():
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
-    message = ""
+    message = "Login"
     if (request.method == 'POST'):
         username = request.form.get('username')
         password = request.form.get('password')
@@ -71,7 +71,7 @@ def dashboard(username):
                     user.update('users.csv')
                 else:
                     message = "Please deposit a positive amount."
-            except TypeError:
+            except ValueError:
                 message = "This is not a depositable number."
         if (request.form.get("withdraw")):
             try:
@@ -83,7 +83,7 @@ def dashboard(username):
                     message = "Please withdraw a positive amount of money."
                 else:
                     message = "You can't afford this withdrawal."
-            except TypeError:
+            except ValueError:
                 message = "This is not a withdrawable number."
         if (request.form.get("change_password")):
             npass = request.form.get("new_password")
@@ -132,10 +132,10 @@ def catch1(username, message):
 @app.route('/end_game/<username>/<message>', methods = ['GET', 'POST'])
 def end_game(username, message):
     payoff = game.stop()
-    message += 'You won: $' + str(payoff) + '<br>'
+    message += 'You won: $' + str(payoff-100) + '<br>'
     user = User.get_user(username, 'users.csv')
     user.money = float(user.money)
-    user.money += payoff - 100
+    user.money += payoff - 50
     user.update('users.csv')
     player.cards = []
     game.__init__(player)

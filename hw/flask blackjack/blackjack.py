@@ -6,7 +6,7 @@ class Card:
         self.type = type
     
     def __str__(self):
-        signs = 'SHCD'
+        signs = '♠♥♣♦'
         card = str(self.value)
         if self.value == 1:
             card = 'A'
@@ -19,7 +19,7 @@ class Card:
 
         return card+signs[self.type]
     def __repr__(self):
-        signs = 'SHCD'
+        signs = '♠♥♣♦'
         card = str(self.value)
         if self.value == 1:
             card = 'A'
@@ -51,7 +51,6 @@ class Player:
     def __init__(self, name):
         self.name = name
         self.cards = []
-        self.money = 0
         self.value = 0
 
     def add_card(self, card):
@@ -109,8 +108,6 @@ class Game:
         elif (s==13):
             payoff = -100
 
-        
-        self.player.money += payoff
         
         return payoff
 
