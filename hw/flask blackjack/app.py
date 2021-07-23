@@ -165,5 +165,11 @@ def end_game(username):
         return render_template('blackjack.jinja', user = str(user), message = session['message'])
     else:
         return redirect(url_for('index'))
+@app.errorhandler(404)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    if (request.method == 'POST'):
+        return redirect(url_for('index'))
+    return render_template('404.jinja'), 404
 if __name__ == '__main__':
    app.run()
