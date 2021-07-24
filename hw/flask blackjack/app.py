@@ -1,11 +1,34 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import csv
-from user import User
 from blackjack import Card, Deck, Player, Game
+from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key = 'dfghjiouhgdashswevnohshshshidnasiodn'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+db = SQLAlchemy(app)
 player = Player('none')
 game = Game(player)
+
+class User(db.Model):
+    uname = db.Column(db.String(80), unique=True, nullable=False, primary_key = True)
+    pswrd = db.Column(db.String(80), nullable=False)
+    money = db.Column(db.Integer)
+
+    def __repr__(self):
+        return '{}: ${}'.format(uname, money)
+
+    def save_db(self, db):
+        db.session.add(self)
+        db.session.commit()
+    def update(self, db):
+        User.query.filter_by(username=uname).first().update({money: money}).update({pswrd: pswrd})
+        db.session.commit()
+
+    @staticmethod
+    def get_user(username, db):
+        return User.query.filter_by(username=uname).first()
+                
+
 @app.route('/', methods = ['GET', 'POST'])
 def index():
     #if (request.form.get("Register")):
@@ -21,16 +44,13 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
         cpassword = request.form.get('confirm password')
-        usernames = []
-        for row in User.read_file('users.csv'):
-            usernames.append(row[0])
-        if (username in usernames):
+        if (User.get_user(username, db)):
             message = "This username is already taken. Please try again."
         else:
             if (password == cpassword):
                 user = User(username, password)
                 session['user'] = user.username
-                user.save_db('users.csv')
+                user.save_db(db)
                 message = "User registered successfully."
                 return redirect(url_for('dashboard', username = username))
             else:
@@ -45,7 +65,7 @@ def login():
     if (request.method == 'POST'):
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.get_user(username, 'users.csv')
+        user = User.get_user(username, db)
         if (user):
             request.user = user
             session['user'] = user.username
@@ -61,7 +81,7 @@ def login():
     return render_template('login.jinja', message = message)
 @app.route('/dashboard/<username>', methods = ['GET', 'POST'])
 def dashboard(username):
-    user = User.get_user(username, 'users.csv')
+    user = User.get_user(username, db)
     message = ''
     user.money = float(user.money)
     if (session['user']):
@@ -71,7 +91,7 @@ def dashboard(username):
                     nmoney = float(request.form.get("amount"))
                     if (nmoney > 0):
                         user.money += nmoney
-                        user.update('users.csv')
+                        user.update(db)
                     else:
                         message = "Please deposit a positive amount."
                 except ValueError:
@@ -81,7 +101,7 @@ def dashboard(username):
                     nmoney = float(request.form.get("amount"))
                     if (nmoney > 0 and (user.money - nmoney) >= 0):
                         user.money -= nmoney
-                        user.update('users.csv')
+                        user.update(db)
                     elif (nmoney < 0):
                         message = "Please withdraw a positive amount of money."
                     else:
@@ -93,7 +113,7 @@ def dashboard(username):
                 cpass = request.form.get("confirm_password")
                 if (npass == cpass):
                     user.password = npass
-                    user.update('users.csv')
+                    user.update(db)
                 else:
                     message = "Passwords do not match."
             if (request.form.get("play")):
@@ -109,7 +129,7 @@ def dashboard(username):
 def blackjack(username):
     if (session['user']):
         session['message'] = ""
-        user = User.get_user(username, 'users.csv')
+        user = User.get_user(username, db)
         user.money = float(user.money)
         next_card = True
         player.name = username
@@ -131,7 +151,7 @@ def blackjack(username):
 def catch1(username):
     if (session['user']):
         if (not game.game_over()):
-            user = User.get_user(username, 'users.csv')
+            user = User.get_user(username, db)
             session['message'] += 'Do you want to take a card: <br>'
             if (request.form.get("exit")):
                 return redirect(url_for('end_game', username = username))
@@ -151,10 +171,10 @@ def end_game(username):
             session['message'] += 'You lost: $' + str(100 - payoff) + '<br>'
         else:
             session['message'] += 'You won: $' + str(payoff-100) + '<br>'
-        user = User.get_user(username, 'users.csv')
+        user = User.get_user(username, db)
         user.money = float(user.money)
         user.money += payoff - 50
-        user.update('users.csv')
+        user.update(db)
         player.cards = []
         game.__init__(player)
         session['message'] += ('do you want to play another game: <br>')

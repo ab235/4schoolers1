@@ -1,4 +1,6 @@
 import csv
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 class User:
     def __init__(self, username = '', password = '', money = 0):
         self.username = username
