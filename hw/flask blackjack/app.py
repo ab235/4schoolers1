@@ -75,9 +75,8 @@ def login():
         password = request.form.get('password')
         user = User.get_user(username, db)
         if (user):
-            request.user = user
-            session['user'] = user.uname
             if (password == user.pswrd):
+                session['user'] = user.uname
                 return redirect(url_for('dashboard', username = username))
             else:
                 message = 'Password does not match.'
