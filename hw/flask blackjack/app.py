@@ -15,18 +15,23 @@ class User(db.Model):
     money = db.Column(db.Integer)
 
     def __repr__(self):
-        return '{}: ${}'.format(uname, money)
+        return '{}: ${}'.format(self.uname, self.money)
 
-    def save_db(self, db):
-        db.session.add(self)
+    @staticmethod
+    def save_db(user, db):
+        db.session.add(user)
         db.session.commit()
-    def update(self, db):
-        User.query.filter_by(username=uname).first().update({money: money}).update({pswrd: pswrd})
+    @staticmethod
+    def update(user, db):
+        puser = User.query.filter_by(uname=user.uname).first()
+        puser.uname = user.uname
+        puser.pswrd = user.pswrd
+        puser.money = user.money
         db.session.commit()
 
     @staticmethod
     def get_user(username, db):
-        return User.query.filter_by(username=uname).first()
+        return User.query.filter_by(uname=username).first()
                 
 
 @app.route('/', methods = ['GET', 'POST'])
@@ -48,9 +53,12 @@ def register():
             message = "This username is already taken. Please try again."
         else:
             if (password == cpassword):
-                user = User(username, password)
-                session['user'] = user.username
-                user.save_db(db)
+                user = User()
+                user.uname = username
+                user.pswrd = password
+                user.money = 0
+                session['user'] = user.uname
+                User.save_db(user, db)
                 message = "User registered successfully."
                 return redirect(url_for('dashboard', username = username))
             else:
@@ -68,8 +76,8 @@ def login():
         user = User.get_user(username, db)
         if (user):
             request.user = user
-            session['user'] = user.username
-            if (password == user.password):
+            session['user'] = user.uname
+            if (password == user.pswrd):
                 return redirect(url_for('dashboard', username = username))
             else:
                 message = 'Password does not match.'
@@ -81,6 +89,7 @@ def login():
     return render_template('login.jinja', message = message)
 @app.route('/dashboard/<username>', methods = ['GET', 'POST'])
 def dashboard(username):
+    session['runs'] = 1
     user = User.get_user(username, db)
     message = ''
     user.money = float(user.money)
@@ -91,7 +100,7 @@ def dashboard(username):
                     nmoney = float(request.form.get("amount"))
                     if (nmoney > 0):
                         user.money += nmoney
-                        user.update(db)
+                        User.update(user, db)
                     else:
                         message = "Please deposit a positive amount."
                 except ValueError:
@@ -101,7 +110,7 @@ def dashboard(username):
                     nmoney = float(request.form.get("amount"))
                     if (nmoney > 0 and (user.money - nmoney) >= 0):
                         user.money -= nmoney
-                        user.update(db)
+                        User.update(user, db)
                     elif (nmoney < 0):
                         message = "Please withdraw a positive amount of money."
                     else:
@@ -112,8 +121,8 @@ def dashboard(username):
                 npass = request.form.get("new_password")
                 cpass = request.form.get("confirm_password")
                 if (npass == cpass):
-                    user.password = npass
-                    user.update(db)
+                    user.pswrd = npass
+                    User.update(user, db)
                 else:
                     message = "Passwords do not match."
             if (request.form.get("play")):
@@ -174,7 +183,7 @@ def end_game(username):
         user = User.get_user(username, db)
         user.money = float(user.money)
         user.money += payoff - 50
-        user.update(db)
+        User.update(user,db)
         player.cards = []
         game.__init__(player)
         session['message'] += ('do you want to play another game: <br>')
@@ -192,4 +201,4 @@ def page_not_found(e):
         return redirect(url_for('index'))
     return render_template('404.jinja'), 404
 if __name__ == '__main__':
-   app.run()
+   app.run(use_reloader=False)
