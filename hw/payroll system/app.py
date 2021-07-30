@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key = 'dfghjiouhgdashswevnohshshshidnasiodn'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///payroll.db'
 db = SQLAlchemy(app)
 
 class Company(db.Model):
@@ -29,8 +29,7 @@ class User(db.Model):
     db.__tablename__ = 'user'
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key = True)
     name = db.Column(db.String(80), nullable=False)
-    type = db.Column(db.String(50))
-    ssn = db.Column(db.Integer, unique=True, nullable=False)
+    ssn = db.Column(db.Integer, nullable=False)
     uname = db.Column(db.String(80), nullable=False)
     password = db.Column(db.String(80), nullable=False)
     salary = db.Column(db.Float, nullable=False)
@@ -114,7 +113,7 @@ def register():
             company.name = name
             company.balance = money
             company.employees.append(Admin())
-            company.employees[0].id = 0
+            company.employees[0].id = len(User.query.all())
             company.employees[0].name = "_"
             company.employees[0].ssn = -1
             company.employees[0].uname = "root"
@@ -141,10 +140,10 @@ def login():
         company_name = request.form.get('company')
         company = db.get_company(company_name, db)
         if (company):
-            if (company.employees.get_user(username)):
-                if (company.employees.get_user(username).password == password):
+            if (company.employees.get_user(username, db)):
+                if (company.employees.get_user(username, db).password == password):
                     session['user'] = username
-                    if (company.employees.get_user(username).is_admin()):
+                    if (company.employees.get_user(username, db).is_admin()):
                         return redirect(url_for('dashboard', name = company.name))
                     else:
                         return redirect(url_for('profile', name = username, cname = company.name))
@@ -158,16 +157,16 @@ def login():
 
 @app.route('/dashboard/<name>', methods = ['GET', 'POST'])
 def dashboard(name):
-    if (Company.get_company(name)):
-        emps = Company.get_company(name).employees
+    if (Company.get_company(name, db)):
+        emps = Company.get_company(name, db).employees
         message = ''
         if (session['user']):
-            if (emps.get_user(session['user'])):
-                if (emps.get_user(session['user']).is_admin()):
+            if (emps.get_user(session['user'], db)):
+                if (emps.get_user(session['user'], db).is_admin()):
                     if (request.method == 'POST'):
                         if (request.form.get('new_user')):
                             return redirect(url_for('ruser', name=name))
-                        admin = emps.get_user(session['user'])
+                        admin = emps.get_user(session['user'], db)
                         ids = [x.id for x in emps]
                         for x in ids:
                             if (str(x) in request.form):
@@ -177,21 +176,21 @@ def dashboard(name):
     return redirect(url_for('index'))
 @app.route('/profile/<cname>/<name>', methods = ['GET', 'POST'])
 def profile(cname, name):
-    if (Company.get_company(cname)):
-        emps = Company.get_company(cname).employees
+    if (Company.get_company(cname), db):
+        emps = Company.get_company(cname, db).employees
         if (session['user']):
-            if (emps.get_user(session['user'])):
-                user = emps.get_user(session['user'])
+            if (emps.get_user(session['user'], db)):
+                user = emps.get_user(session['user'], db)
                 return render_template('profile.jinja', user=user)
     return render_template('profile.jinja')
 @app.route('/ruser/<name>', methods = ['GET', 'POST'])
 def ruser(name):
-    if (Company.get_company(name)):
-        emps = Company.get_company(name).employees
+    if (Company.get_company(name, db)):
+        emps = Company.get_company(name, db).employees
         message = ''
         if (session['user']):
-            if (emps.get_user(session['user'])):
-                if (emps.get_user(session['user']).is_admin()):
+            if (emps.get_user(session['user'], db)):
+                if (emps.get_user(session['user'], db).is_admin()):
                     return render_template("profile.jinja")
 
 
