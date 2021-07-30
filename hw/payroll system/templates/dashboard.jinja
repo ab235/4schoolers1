@@ -5,8 +5,8 @@
     </head>
     <body style = "background-image: url('https://professorslots.com/wp-content/uploads/2018/03/1-casino-632862-680.jpg'); background-size: cover;">
         <h1 style="color: goldenrod;">Dashboard</h1>
-        <input class="btn btn-primary" type="submit" name="new_user" value="Register new user" style="position: relative; left: 100px; top: 50px;">
-        <table class="table">
+        <a class="btn btn-primary" href="{{url_for('ruser', name=emps[0].company)}}" role="button" style="position: relative; left: 200px; top: -25px;">Update/Add User</a>
+        <table class="table table-dark">
           <thead class="thead-dark">
             <tr>
               <th scope="col">#</th>
@@ -19,10 +19,11 @@
           <tbody>
             {% for user in emps %}
                 <tr>
+                    <td>{{user.id}}</td>
                     <td>{{user.name}}</td>
                     <td>{{user.salary}}</td>
                     <td><input class="btn btn-primary" type="submit" name="{{user.id}}" value="Pay"></td>
-                    <td><a class="btn btn-primary" href="{{url_for('profile', user=user)}}" role="button">Profile</a></td>
+                    <td><a class="btn btn-primary" href="{{url_for('profile', name=user.uname, cname=user.company.name)}}" role="button">Profile</a></td>
                 </tr>
             {% endfor %}
           </tbody>
