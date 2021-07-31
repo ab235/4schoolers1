@@ -195,7 +195,7 @@ def ruser(name):
             if (User.get_user_l(session['user'], emps)):
                 if (User.get_user_l(session['user'], emps).is_admin()):
                     if (request.method == "POST"):
-                        admini = request.form.get('admin')
+                        admini = 'admin' in request.form
                         name = request.form.get('name')
                         ssn = request.form.get('ssn')
                         uname = request.form.get('uname')
@@ -213,9 +213,9 @@ def ruser(name):
                                     for j in range(len(list1)):
                                         if (list1[j] != ""):
                                             list2[j] = list1[j]
-                                    if (len(admini) > 0 and not emps[i].is_admin()):
+                                    if (admini and not emps[i].is_admin()):
                                         emps[0].company.admin_id += "," + str(emps[i].id)
-                                    if (len(admini) == 0 and emps[i].is_admin()):
+                                    if (not admini and emps[i].is_admin()):
                                         ad_list = emps[0].company.admin_id.split()
                                         ad_list.remove(str(emps[i].id))
                                         emps[0].company.admin_id = ",".join(ad_list)
@@ -240,6 +240,9 @@ def ruser(name):
                                     user.balance = 0.0
                                     user.company = User.get_user_l(session['user'], emps).company
                                     User.save_db(user, db)
+                                    if (admini):
+                                        user.company.admin_id += "," + str(user.id)
+                                    db.session.commit()
                                 else:
                                     message = "Spots empty."
                             return redirect(url_for('dashboard', name = emps[0].company.name))
