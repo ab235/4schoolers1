@@ -159,7 +159,7 @@ def dashboard(name):
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
                 if (User.get_user_l(session['user'], emps).is_admin()):
-                    return render_template('dashboard.jinja', message = message, emps = emps)
+                    return render_template('dashboard.jinja', message = message, emps = emps, do="add")
     return redirect(url_for('index'))
 @app.route('/pay/<cname>/<name>', methods = ['GET', 'POST'])
 def pay(cname, name):
@@ -183,46 +183,82 @@ def profile(cname, name):
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
                 user = User.get_user_l(session['user'], emps)
-                return render_template('profile.jinja', user=User.get_user_l(name, emps))
-    return render_template('index.jinja')
-@app.route('/ruser/<name>', methods = ['GET', 'POST'])
-def ruser(name):
+                return render_template('profile.jinja', user=User.get_user_l(name, emps), do="update")
+    return redirect(url_for('index'))
+@app.route('/ruser/<name>/<status>', methods = ['GET', 'POST'])
+def ruser(name, status):
     if (Company.get_company(name, db)):
         emps = Company.get_company(name, db).employees
         message = ''
         check = False
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
-                if (User.get_user_l(session['user'], emps).is_admin()):
+                if (status == "update"):
                     if (request.method == "POST"):
-                        admini = 'admin' in request.form
+                        if (User.get_user_l(session['user'], emps).is_admin()):
+                            admini = 'admin' in request.form
+                        else:
+                            admini = False
                         name = request.form.get('name')
                         ssn = request.form.get('ssn')
                         uname = request.form.get('uname')
-                        if (True):
+                        if (User.get_user_l(uname, emps)):
                             password = request.form.get('password')
-                            salary = request.form.get('salary')
-                            attendance = request.form.get('attendance')
-                            rating = request.form.get('rating')
-                            level = request.form.get('level')
+                            if (User.get_user_l(session['user'], emps).is_admin()):
+                                salary = request.form.get('salary')
+                                attendance = request.form.get('attendance')
+                                rating = request.form.get('rating')
+                                level = request.form.get('level')
+                            else:
+                                salary = ""
+                                attendance = ""
+                                rating = ""
+                                level = ""
                             company = User.get_user_l(session['user'], emps).company
                             list1 = [name, ssn, password, salary, attendance, rating, level]
                             for i in range(len(emps)):
                                 if (emps[i].uname == uname):
-                                    list2 = [emps[i].name, emps[i].ssn, emps[i].password, emps[i].salary, emps[i].attendance, emps[i].rating, emps[i].level]
-                                    for j in range(len(list1)):
+                                    listf = []
+                                    list2 = (emps[i].name, emps[i].ssn, emps[i].password, emps[i].salary, emps[i].attendance, emps[i].rating, emps[i].level)
+                                    for j in range(len(list2)):
                                         if (list1[j] != ""):
-                                            list2[j] = list1[j]
+                                            listf.append(list1[j])
+                                        else:
+                                            listf.append(list2[j])
+                                    emps[i].name = listf[0]
+                                    emps[i].ssn = listf[1]
+                                    emps[i].password = listf[2]
+                                    emps[i].salary = listf[3]
+                                    emps[i].attendance = listf[4]
+                                    emps[i].rating = listf[5]
+                                    emps[i].level = listf[6]
                                     if (admini and not emps[i].is_admin()):
                                         emps[0].company.admin_id += "," + str(emps[i].id)
                                     if (not admini and emps[i].is_admin()):
-                                        ad_list = emps[0].company.admin_id.split()
+                                        ad_list = emps[0].company.admin_id.split(",")
                                         ad_list.remove(str(emps[i].id))
                                         emps[0].company.admin_id = ",".join(ad_list)
                                     check = True
                                     db.session.commit()
                                     break
-                            if (not check):
+                            return redirect(url_for('profile', cname=company.name, name=uname))
+                        else:
+                            message = "Username not in database."
+                elif (status == "add"):
+                    if (User.get_user_l(session['user'], emps).is_admin()):
+                        if (request.method == "POST"):
+                            admini = 'admin' in request.form
+                            name = request.form.get('name')
+                            ssn = request.form.get('ssn')
+                            uname = request.form.get('uname')
+                            if (not User.get_user_l(uname, emps)):
+                                password = request.form.get('password')
+                                salary = request.form.get('salary')
+                                attendance = request.form.get('attendance')
+                                rating = request.form.get('rating')
+                                level = request.form.get('level')
+                                company = User.get_user_l(session['user'], emps).company
+                                list1 = [name, ssn, password, salary, attendance, rating, level]
                                 check = True
                                 for j in range(len(list1)):
                                     if (list1[j] == ""):
@@ -245,14 +281,13 @@ def ruser(name):
                                     db.session.commit()
                                 else:
                                     message = "Spots empty."
+                            else:
+                                message = "Username taken."
                             return redirect(url_for('dashboard', name = emps[0].company.name))
-                        else:
-                            message = "Username taken."
 
 
-                    return render_template("ruser.jinja", message = message)
-
-
+                return render_template("ruser.jinja", message = message)
+    return redirect(url_for("index"))
 
 
 if __name__ == '__main__':

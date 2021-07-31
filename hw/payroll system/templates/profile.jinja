@@ -7,21 +7,20 @@
         <table class="table table-dark">
           <thead class="thead-dark">
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Name</th>
-              <th scope="col">Salary</th>
-              <th scope="col">Balance</th>
-              <th scope="col">Level</th>
+              <th scope="col">Details</th>
+              <th scope="col">Information</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-                <td>{{user.id}}</td>
-                <td>{{user.name}}</td>
-                <td>{{user.salary}}</td>
-                <td>{{user.balance}}</td>
-                <td>{{user.level}}</td>
-            </tr>
+                {% for x in [["id", user.id], ["name", user.name], ["username", user.uname], ["password", user.password], ["salary", user.salary], ["balance", user.balance], ["attendance", user.attendance], ["level", user.level], ["rating", user.rating]] %}
+                    <tr>
+                        <td>{{x[0]}}</td>
+                        <td>{{x[1]}}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td>Update</td>
+                    <td><a class="btn btn-primary" href="{{url_for('ruser', name=user.company.name, status=do)}}" role="button">Update Profile</a></td>
           </tbody>
         </table>
     </body>
