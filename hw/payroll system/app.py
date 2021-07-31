@@ -57,8 +57,8 @@ class User(db.Model):
         db.session.add(user)
         db.session.commit()
     @staticmethod
-    def update(user, id, db):
-        puser = User.query.filter_by(id=id).first()
+    def update(user, ssn, db):
+        puser = User.query.filter_by(ssn=ssn).first()
         puser.name = user.name
         puser.ssn = user.ssn
         puser.salary = user.salary
@@ -68,8 +68,7 @@ class User(db.Model):
         puser.balance = user.balance
         puser.uname = user.uname
         puser.password = user.password
-        print(user.company.employees)
-        del user
+        print(puser.company.employees)
         db.session.commit()
 
     @staticmethod
@@ -81,7 +80,7 @@ class User(db.Model):
             if (lis[i].uname == uname):
                 return lis[i]
         return False
-    def pay_user(id):
+    def pay_user(self, id):
         user = User.query.filter_by(id=id).first()
         if (user.company.balance - user.salary < 0):
             return False
@@ -157,18 +156,26 @@ def login():
 def dashboard(name):
     if (Company.get_company(name, db)):
         emps = Company.get_company(name, db).employees
-        message = ''
+        message = Company.get_company(name, db).balance
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
                 if (User.get_user_l(session['user'], emps).is_admin()):
-                    if (request.method == 'POST'):
-                        admin = User.get_user_l(session['user'], emps)
-                        ids = [x.id for x in emps]
-                        for x in ids:
-                            if (str(x) in request.form):
-                                admin.pay_user(x)
-                                message = str(emps.filter_by(id=x).first().name) + " has been paid."
                     return render_template('dashboard.jinja', message = message, emps = emps)
+    return redirect(url_for('index'))
+@app.route('/pay/<cname>/<name>', methods = ['GET', 'POST'])
+def pay(cname, name):
+    if (session['user']):
+        if (Company.get_company(cname, db)):
+            company = Company.get_company(cname, db)
+            emps = company.employees
+            if (User.get_user_l(session['user'], emps)):
+                if (User.get_user_l(session['user'], emps).is_admin()):
+                    company = Company.get_company(cname, db)
+                    emps = company.employees
+                    admin = User.get_user_l(session['user'], emps)
+                    id = User.get_user(name, db).id
+                    admin.pay_user(id)
+                    return redirect(url_for('dashboard', name = cname))
     return redirect(url_for('index'))
 @app.route('/profile/<cname>/<name>', methods = ['GET', 'POST'])
 def profile(cname, name):
@@ -189,18 +196,17 @@ def ruser(name):
             if (User.get_user_l(session['user'], emps)):
                 if (User.get_user_l(session['user'], emps).is_admin()):
                     if (request.method == "POST"):
-                        id1 = request.form.get('id')
+                        admini = request.form.get('admin')
                         name = request.form.get('name')
                         ssn = request.form.get('ssn')
                         uname = request.form.get('uname')
-                        if not ((uname in [x.uname for x in emps]) and (id1 not in [x.id for x in emps])):
+                        if (not (User.get_user_l(uname, emps))):
                             password = request.form.get('password')
                             salary = request.form.get('salary')
                             attendance = request.form.get('attendance')
                             rating = request.form.get('rating')
                             level = request.form.get('level')
                             user = User()
-                            user.id = len(User.query.all())
                             user.balance = 0.0
                             user.name = name
                             user.ssn = ssn
@@ -212,16 +218,26 @@ def ruser(name):
                             user.level = level
                             user.company = User.get_user_l(session['user'], emps).company
                             for i in range(len(emps)):
-                                if (emps[i].id == int(id1)):
+                                if (emps[i].ssn == int(ssn)):
+                                    if (len(uname) == 0):
+                                        user.uname = emps[i].uname
                                     user.balance = emps[i].balance
-                                    User.update(user, id1, db)
+                                    print(emps)
+                                    User.update(user, ssn, db)
+                                    if (len(admini) > 0 and not emps[i].is_admin()):
+                                        emps[0].company.admin_id += "," + str(emps[i].id)
+                                    if (len(admini) == 0 and emps[i].is_admin()):
+                                        ad_list = emps[0].company.admin_id.split()
+                                        ad_list.remove(str(emps[i].id))
+                                        emps[0].company.admin_id = ",".join(ad_list)
                                     print(User.query.all())
                                     check = True
                                     break
                             print(check)
                             if (not check):
-                                print(check)
+                                user.id = len(User.query.all())
                                 User.save_db(user, db)
+                                user.company = User.get_user_l(session['user'], emps).company
                             return redirect(url_for('dashboard', name = emps[0].company.name))
                         else:
                             message = "Username taken."

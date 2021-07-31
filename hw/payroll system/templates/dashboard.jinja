@@ -22,7 +22,7 @@
                     <td>{{user.id}}</td>
                     <td>{{user.name}}</td>
                     <td>{{user.salary}}</td>
-                    <td><input class="btn btn-primary" type="submit" name="{{user.id}}" value="Pay"></td>
+                    <td><a class="btn btn-primary" href="{{url_for('pay', name=user.uname, cname=user.company.name)}}" role="button">Pay</a></td>
                     <td><a class="btn btn-primary" href="{{url_for('profile', name=user.uname, cname=user.company.name)}}" role="button">Profile</a></td>
                 </tr>
             {% endfor %}
