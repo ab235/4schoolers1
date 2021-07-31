@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key = 'dfghjiouhgdashswevnohshshshidnasiodn'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///payrolltwo.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///payrollthree.db'
 db = SQLAlchemy(app)
 
 class Company(db.Model):
@@ -58,7 +58,10 @@ class User(db.Model):
         db.session.commit()
     @staticmethod
     def update(user, ssn, db):
-        puser = User.query.filter_by(ssn=ssn).first()
+        emps = Company.query.filter_by(name=user.company.name).first().employees
+        for i in range(len(emps)):
+            if (lis[i].ssn == ssn):
+                return lis[i]
         puser.name = user.name
         puser.ssn = user.ssn
         puser.salary = user.salary
@@ -68,7 +71,6 @@ class User(db.Model):
         puser.balance = user.balance
         puser.uname = user.uname
         puser.password = user.password
-        print(puser.company.employees)
         db.session.commit()
 
     @staticmethod
@@ -103,13 +105,10 @@ def register():
             message = "This name is already taken. Please try again."
         else:
             company = Company()
-            company.id = len(Company.query.all())
             company.name = name
             company.balance = money
-            company.admin_id = str(len(User.query.all()))
             Company.save_db(company, db)
             first = User()
-            first.id = len(User.query.all())
             first.name = "()"
             first.ssn = -1
             first.uname = "root"
@@ -121,7 +120,7 @@ def register():
             first.balance = 0.0
             first.company = company
             company.employees.append(first)
-
+            company.admin_id = str(first.id)
             session['user'] = "root"
             Company.save_db(company, db)
             message = "User registered successfully."
@@ -184,8 +183,8 @@ def profile(cname, name):
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
                 user = User.get_user_l(session['user'], emps)
-                return render_template('profile.jinja', user=user)
-    return render_template('profile.jinja')
+                return render_template('profile.jinja', user=User.get_user_l(name, emps))
+    return render_template('index.jinja')
 @app.route('/ruser/<name>', methods = ['GET', 'POST'])
 def ruser(name):
     if (Company.get_company(name, db)):
@@ -200,44 +199,49 @@ def ruser(name):
                         name = request.form.get('name')
                         ssn = request.form.get('ssn')
                         uname = request.form.get('uname')
-                        if (not (User.get_user_l(uname, emps))):
+                        if (True):
                             password = request.form.get('password')
                             salary = request.form.get('salary')
                             attendance = request.form.get('attendance')
                             rating = request.form.get('rating')
                             level = request.form.get('level')
-                            user = User()
-                            user.balance = 0.0
-                            user.name = name
-                            user.ssn = ssn
-                            user.uname = uname
-                            user.password = password
-                            user.salary = salary
-                            user.attendance = attendance
-                            user.rating = rating
-                            user.level = level
-                            user.company = User.get_user_l(session['user'], emps).company
+                            company = User.get_user_l(session['user'], emps).company
+                            list1 = [name, ssn, password, salary, attendance, rating, level]
                             for i in range(len(emps)):
-                                if (emps[i].ssn == int(ssn)):
-                                    if (len(uname) == 0):
-                                        user.uname = emps[i].uname
-                                    user.balance = emps[i].balance
-                                    print(emps)
-                                    User.update(user, ssn, db)
+                                if (emps[i].uname == uname):
+                                    list2 = [emps[i].name, emps[i].ssn, emps[i].password, emps[i].salary, emps[i].attendance, emps[i].rating, emps[i].level]
+                                    for j in range(len(list1)):
+                                        if (list1[j] != ""):
+                                            list2[j] = list1[j]
                                     if (len(admini) > 0 and not emps[i].is_admin()):
                                         emps[0].company.admin_id += "," + str(emps[i].id)
                                     if (len(admini) == 0 and emps[i].is_admin()):
                                         ad_list = emps[0].company.admin_id.split()
                                         ad_list.remove(str(emps[i].id))
                                         emps[0].company.admin_id = ",".join(ad_list)
-                                    print(User.query.all())
                                     check = True
+                                    db.session.commit()
                                     break
-                            print(check)
                             if (not check):
-                                user.id = len(User.query.all())
-                                User.save_db(user, db)
-                                user.company = User.get_user_l(session['user'], emps).company
+                                check = True
+                                for j in range(len(list1)):
+                                    if (list1[j] == ""):
+                                        check = False
+                                if (check):
+                                    user = User()
+                                    user.name = name
+                                    user.ssn = ssn
+                                    user.uname = uname
+                                    user.password = password
+                                    user.salary = salary
+                                    user.attendance = attendance
+                                    user.rating = rating
+                                    user.level = level
+                                    user.balance = 0.0
+                                    user.company = User.get_user_l(session['user'], emps).company
+                                    User.save_db(user, db)
+                                else:
+                                    message = "Spots empty."
                             return redirect(url_for('dashboard', name = emps[0].company.name))
                         else:
                             message = "Username taken."
@@ -249,4 +253,5 @@ def ruser(name):
 
 
 if __name__ == '__main__':
+    #db.create_all()
     app.run(use_reloader=False)
