@@ -159,7 +159,7 @@ def dashboard(name):
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
                 if (User.get_user_l(session['user'], emps).is_admin()):
-                    return render_template('dashboard.jinja', message = message, emps = emps, do="add")
+                    return render_template('dashboard.jinja', message = message, emps = emps, do="Add")
     return redirect(url_for('index'))
 @app.route('/pay/<cname>/<name>', methods = ['GET', 'POST'])
 def pay(cname, name):
@@ -183,17 +183,17 @@ def profile(cname, name):
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
                 user = User.get_user_l(session['user'], emps)
-                return render_template('profile.jinja', user=User.get_user_l(name, emps), do="update")
+                return render_template('profile.jinja', user=User.get_user_l(name, emps), do="Update")
     return redirect(url_for('index'))
 @app.route('/ruser/<name>/<status>', methods = ['GET', 'POST'])
 def ruser(name, status):
     if (Company.get_company(name, db)):
         emps = Company.get_company(name, db).employees
-        message = ''
+        message = status + " User"
         check = False
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
-                if (status == "update"):
+                if (status == "Update"):
                     if (request.method == "POST"):
                         if (User.get_user_l(session['user'], emps).is_admin()):
                             admini = 'admin' in request.form
@@ -213,6 +213,16 @@ def ruser(name, status):
                                 salary = ""
                                 attendance = ""
                                 rating = ""
+                                level = ""
+                            if (not ssn.isnumeric()):
+                                ssn = ""
+                            if (not salary.isnumeric()):
+                                salary = ""
+                            if (not attendance.isnumeric()):
+                                attendance = ""
+                            if (not rating.isnumeric()):
+                                rating = ""
+                            if (not level.isnumeric()):
                                 level = ""
                             company = User.get_user_l(session['user'], emps).company
                             list1 = [name, ssn, password, salary, attendance, rating, level]
@@ -241,12 +251,16 @@ def ruser(name, status):
                                     check = True
                                     db.session.commit()
                                     break
-                            return redirect(url_for('profile', cname=company.name, name=uname))
+                            if (User.get_user_l(session['user'], emps).is_admin()):
+                                return redirect(url_for('dashboard', name=company.name))
+                            else:
+                                return redirect(url_for('profile', cname=company.name, name=uname))
                         else:
                             message = "Username not in database."
-                elif (status == "add"):
+                elif (status == "Add"):
                     if (User.get_user_l(session['user'], emps).is_admin()):
                         if (request.method == "POST"):
+                            check = True
                             admini = 'admin' in request.form
                             name = request.form.get('name')
                             ssn = request.form.get('ssn')
@@ -257,9 +271,10 @@ def ruser(name, status):
                                 attendance = request.form.get('attendance')
                                 rating = request.form.get('rating')
                                 level = request.form.get('level')
+                                if (not salary.isnumeric() or not attendance.isnumeric() or not rating.isnumeric() or not level.isnumeric() or not ssn.isnumeric()):
+                                    check = False
                                 company = User.get_user_l(session['user'], emps).company
                                 list1 = [name, ssn, password, salary, attendance, rating, level]
-                                check = True
                                 for j in range(len(list1)):
                                     if (list1[j] == ""):
                                         check = False
@@ -288,8 +303,38 @@ def ruser(name, status):
 
                 return render_template("ruser.jinja", message = message)
     return redirect(url_for("index"))
+@app.route('/funds/<cname>', methods = ['GET', 'POST'])
+def funds(cname):
+    if (Company.get_company(cname, db)):
+        company = Company.get_company(cname, db)
+        emps = company.employees
+        message = ''
+        if (session['user']):
+            if (User.get_user_l(session['user'], emps)):
+                if (User.get_user_l(session['user'], emps).is_admin()):
+                    if (request.method == "POST"):
+                        funds = request.form.get('deposit')
+                        try:
+                            ifunds = float(funds)
+                            if (ifunds > 0):
+                                company.balance += ifunds
+                                db.session.commit()
+                                return redirect(url_for("dashboard", name=cname))
+                            else:
+                                print(float("lmao"))
+                        except ValueError:
+                            message = "That isn't a depositable number."
+                    return render_template("funds.jinja", message = message, funds = company.balance)
 
 
+    return redirect(url_for("index"))
+
+@app.errorhandler(404)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    if (request.method == 'POST'):
+        return redirect(url_for('index'))
+    return render_template('404.jinja'), 404
 if __name__ == '__main__':
     #db.create_all()
     app.run(use_reloader=False)
