@@ -10,7 +10,6 @@
         <table class="table table-dark">
           <thead class="thead-dark">
             <tr>
-              <th scope="col">#</th>
               <th scope="col">Name</th>
               <th scope="col">Salary</th>
               <th scope="col">Pay</th>
@@ -19,13 +18,14 @@
           </thead>
           <tbody>
             {% for user in emps %}
-                <tr>
-                    <td>{{user.id}}</td>
-                    <td>{{user.name}}</td>
-                    <td>{{user.salary}}</td>
-                    <td><a class="btn btn-primary" href="{{url_for('pay', name=user.uname, cname=user.company.name)}}" role="button">Pay</a></td>
-                    <td><a class="btn btn-primary" href="{{url_for('profile', name=user.uname, cname=user.company.name)}}" role="button">Profile</a></td>
-                </tr>
+                {% if user.uname != "root" %}
+                    <tr>
+                        <td>{{user.name}}</td>
+                        <td>{{user.salary}}</td>
+                        <td><a class="btn btn-primary" href="{{url_for('pay', name=user.uname, cname=user.company.name)}}" role="button">Pay</a></td>
+                        <td><a class="btn btn-primary" href="{{url_for('profile', name=user.uname, cname=user.company.name)}}" role="button">Profile</a></td>
+                    </tr>
+                {% endif %}
             {% endfor %}
           </tbody>
         </table>

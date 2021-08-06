@@ -183,7 +183,7 @@ def profile(cname, name):
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
                 user = User.get_user_l(session['user'], emps)
-                return render_template('profile.jinja', user=User.get_user_l(name, emps), do="Update")
+                return render_template('profile.jinja', user=User.get_user_l(name, emps), s=user, do="Update")
     return redirect(url_for('index'))
 @app.route('/ruser/<name>/<status>', methods = ['GET', 'POST'])
 def ruser(name, status):
@@ -302,6 +302,28 @@ def ruser(name, status):
 
 
                 return render_template("ruser.jinja", message = message)
+    return redirect(url_for("index"))
+@app.route('/uuser/<name>', methods = ['GET', 'POST'])
+def uuser(name):
+    if (Company.get_company(name, db)):
+        company = Company.get_company(name, db)
+        emps = company.employees
+        message = 'Update Info'
+        if (session['user']):
+            if (User.get_user_l(session['user'], emps)):
+                if (request.method == "POST"):
+                    name = request.form.get("name")
+                    uname = request.form.get("uname")
+                    password = request.form.get("password")
+                    for i in range(len(emps)):
+                        if (emps[i].uname == uname):
+                            if (name != ""):
+                                emps[i].name = name
+                            if (password != ""):
+                                emps[i].password = password
+                            db.session.commit()
+                            return redirect(url_for('profile', cname=company.name, name=uname))
+                return render_template("uuser.jinja", message = message)
     return redirect(url_for("index"))
 @app.route('/funds/<cname>', methods = ['GET', 'POST'])
 def funds(cname):
