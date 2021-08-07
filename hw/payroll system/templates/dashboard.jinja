@@ -5,7 +5,7 @@
     </head>
     <body style = "background-image: url('https://ak.picdn.net/shutterstock/videos/13348298/thumb/1.jpg'); background-size: cover;">
         <h1>Dashboard</h1>
-        <a class="btn btn-primary" href="{{url_for('ruser', name=emps[0].company.name, status=do)}}" role="button" style="position: relative; left: 1025px; top: -50px;">Add User</a>
+        <a class="btn btn-primary" href="{{url_for('ruser', cname=emps[0].company.name, status=do, name='r')}}" role="button" style="position: relative; left: 1025px; top: -50px;">Add User</a>
         <a class="btn btn-primary" href="{{url_for('funds', cname=emps[0].company.name)}}" role="button" style="position: relative; left: 1050px; top: -50px;">Check Funds</a>
         <table class="table table-dark">
           <thead class="thead-dark">

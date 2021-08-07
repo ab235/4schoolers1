@@ -21,9 +21,9 @@
                 <tr>
                     <td>Update</td>
                     {% if s.is_admin() %}
-                        <td><a class="btn btn-primary" href="{{url_for('ruser', name=user.company.name, status=do)}}" role="button">Update Profile</a></td>
+                        <td><a class="btn btn-primary" href="{{url_for('ruser', cname=user.company.name, status=do, name=user.uname)}}" role="button">Update Profile</a></td>
                     {% else %}
-                        <td><a class="btn btn-primary" href="{{url_for('uuser', name=user.company.name)}}" role="button">Update Profile</a></td>
+                        <td><a class="btn btn-primary" href="{{url_for('uuser', cname=user.company.name, name=user.uname)}}" role="button">Update Profile</a></td>
                     {% endif %}
                 </tr>
           </tbody>

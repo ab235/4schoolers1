@@ -185,10 +185,11 @@ def profile(cname, name):
                 user = User.get_user_l(session['user'], emps)
                 return render_template('profile.jinja', user=User.get_user_l(name, emps), s=user, do="Update")
     return redirect(url_for('index'))
-@app.route('/ruser/<name>/<status>', methods = ['GET', 'POST'])
-def ruser(name, status):
-    if (Company.get_company(name, db)):
-        emps = Company.get_company(name, db).employees
+@app.route('/ruser/<cname>/<status>/<name>', methods = ['GET', 'POST'])
+def ruser(cname, status, name):
+    username = name
+    if (Company.get_company(cname, db)):
+        emps = Company.get_company(cname, db).employees
         message = status + " User"
         check = False
         if (session['user']):
@@ -202,7 +203,7 @@ def ruser(name, status):
                         name = request.form.get('name')
                         ssn = request.form.get('ssn')
                         uname = request.form.get('uname')
-                        if (User.get_user_l(uname, emps)):
+                        if (User.get_user_l(username, emps)):
                             password = request.form.get('password')
                             if (User.get_user_l(session['user'], emps).is_admin()):
                                 salary = request.form.get('salary')
@@ -225,11 +226,11 @@ def ruser(name, status):
                             if (not level.isnumeric()):
                                 level = ""
                             company = User.get_user_l(session['user'], emps).company
-                            list1 = [name, ssn, password, salary, attendance, rating, level]
+                            list1 = [name, ssn, uname, password, salary, attendance, rating, level]
                             for i in range(len(emps)):
-                                if (emps[i].uname == uname):
+                                if (emps[i].uname == username):
                                     listf = []
-                                    list2 = (emps[i].name, emps[i].ssn, emps[i].password, emps[i].salary, emps[i].attendance, emps[i].rating, emps[i].level)
+                                    list2 = (emps[i].name, emps[i].ssn, emps[i].uname, emps[i].password, emps[i].salary, emps[i].attendance, emps[i].rating, emps[i].level)
                                     for j in range(len(list2)):
                                         if (list1[j] != ""):
                                             listf.append(list1[j])
@@ -237,11 +238,14 @@ def ruser(name, status):
                                             listf.append(list2[j])
                                     emps[i].name = listf[0]
                                     emps[i].ssn = listf[1]
-                                    emps[i].password = listf[2]
-                                    emps[i].salary = listf[3]
-                                    emps[i].attendance = listf[4]
-                                    emps[i].rating = listf[5]
-                                    emps[i].level = listf[6]
+                                    emps[i].uname = listf[2]
+                                    emps[i].password = listf[3]
+                                    emps[i].salary = listf[4]
+                                    emps[i].attendance = listf[5]
+                                    emps[i].rating = listf[6]
+                                    emps[i].level = listf[7]
+                                    if (session["user"] == username):
+                                        session["user"] = listf[2]
                                     if (admini and not emps[i].is_admin()):
                                         emps[0].company.admin_id += "," + str(emps[i].id)
                                     if (not admini and emps[i].is_admin()):
@@ -303,26 +307,26 @@ def ruser(name, status):
 
                 return render_template("ruser.jinja", message = message)
     return redirect(url_for("index"))
-@app.route('/uuser/<name>', methods = ['GET', 'POST'])
-def uuser(name):
-    if (Company.get_company(name, db)):
-        company = Company.get_company(name, db)
+@app.route('/uuser/<cname>/<name>', methods = ['GET', 'POST'])
+def uuser(cname, name):
+    username = name
+    if (Company.get_company(cname, db)):
+        company = Company.get_company(cname, db)
         emps = company.employees
         message = 'Update Info'
         if (session['user']):
             if (User.get_user_l(session['user'], emps)):
                 if (request.method == "POST"):
                     name = request.form.get("name")
-                    uname = request.form.get("uname")
                     password = request.form.get("password")
                     for i in range(len(emps)):
-                        if (emps[i].uname == uname):
+                        if (emps[i].uname == username):
                             if (name != ""):
                                 emps[i].name = name
                             if (password != ""):
                                 emps[i].password = password
                             db.session.commit()
-                            return redirect(url_for('profile', cname=company.name, name=uname))
+                            return redirect(url_for('profile', cname=company.name, name=username))
                 return render_template("uuser.jinja", message = message)
     return redirect(url_for("index"))
 @app.route('/funds/<cname>', methods = ['GET', 'POST'])
