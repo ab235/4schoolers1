@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from utils.password_validation import pass_val
+from utils.passstatus import status_method
 app = Flask(__name__)
 app.secret_key = 'dfghjiouhgdashswevnohshshshidnasiodn'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///payrollthree.db'
@@ -208,60 +209,63 @@ def ruser(cname, status, name):
                             password = request.form.get('password')
                             cpassword = request.form.get('cpassword')
                             if (pass_val(password, cpassword)):
-                                if (User.get_user_l(session['user'], emps).is_admin()):
-                                    salary = request.form.get('salary')
-                                    attendance = request.form.get('attendance')
-                                    rating = request.form.get('rating')
-                                    level = request.form.get('level')
+                                if (status_method(password) != "Weak"):
+                                    if (User.get_user_l(session['user'], emps).is_admin()):
+                                        salary = request.form.get('salary')
+                                        attendance = request.form.get('attendance')
+                                        rating = request.form.get('rating')
+                                        level = request.form.get('level')
+                                    else:
+                                        salary = ""
+                                        attendance = ""
+                                        rating = ""
+                                        level = ""
+                                    if (not ssn.isnumeric()):
+                                        ssn = ""
+                                    if (not salary.isnumeric()):
+                                        salary = ""
+                                    if (not attendance.isnumeric()):
+                                        attendance = ""
+                                    if (not rating.isnumeric()):
+                                        rating = ""
+                                    if (not level.isnumeric()):
+                                        level = ""
+                                    company = User.get_user_l(session['user'], emps).company
+                                    list1 = [name, ssn, uname, password, salary, attendance, rating, level]
+                                    for i in range(len(emps)):
+                                        if (emps[i].uname == username):
+                                            listf = []
+                                            list2 = (emps[i].name, emps[i].ssn, emps[i].uname, emps[i].password, emps[i].salary, emps[i].attendance, emps[i].rating, emps[i].level)
+                                            for j in range(len(list2)):
+                                                if (list1[j] != ""):
+                                                    listf.append(list1[j])
+                                                else:
+                                                    listf.append(list2[j])
+                                            emps[i].name = listf[0]
+                                            emps[i].ssn = listf[1]
+                                            emps[i].uname = listf[2]
+                                            emps[i].password = listf[3]
+                                            emps[i].salary = listf[4]
+                                            emps[i].attendance = listf[5]
+                                            emps[i].rating = listf[6]
+                                            emps[i].level = listf[7]
+                                            if (session["user"] == username):
+                                                session["user"] = listf[2]
+                                            if (admini and not emps[i].is_admin()):
+                                                emps[0].company.admin_id += "," + str(emps[i].id)
+                                            if (not admini and emps[i].is_admin()):
+                                                ad_list = emps[0].company.admin_id.split(",")
+                                                ad_list.remove(str(emps[i].id))
+                                                emps[0].company.admin_id = ",".join(ad_list)
+                                            check = True
+                                            db.session.commit()
+                                            break
+                                    if (User.get_user_l(session['user'], emps).is_admin()):
+                                        return redirect(url_for('dashboard', name=company.name))
+                                    else:
+                                        return redirect(url_for('profile', cname=company.name, name=uname))
                                 else:
-                                    salary = ""
-                                    attendance = ""
-                                    rating = ""
-                                    level = ""
-                                if (not ssn.isnumeric()):
-                                    ssn = ""
-                                if (not salary.isnumeric()):
-                                    salary = ""
-                                if (not attendance.isnumeric()):
-                                    attendance = ""
-                                if (not rating.isnumeric()):
-                                    rating = ""
-                                if (not level.isnumeric()):
-                                    level = ""
-                                company = User.get_user_l(session['user'], emps).company
-                                list1 = [name, ssn, uname, password, salary, attendance, rating, level]
-                                for i in range(len(emps)):
-                                    if (emps[i].uname == username):
-                                        listf = []
-                                        list2 = (emps[i].name, emps[i].ssn, emps[i].uname, emps[i].password, emps[i].salary, emps[i].attendance, emps[i].rating, emps[i].level)
-                                        for j in range(len(list2)):
-                                            if (list1[j] != ""):
-                                                listf.append(list1[j])
-                                            else:
-                                                listf.append(list2[j])
-                                        emps[i].name = listf[0]
-                                        emps[i].ssn = listf[1]
-                                        emps[i].uname = listf[2]
-                                        emps[i].password = listf[3]
-                                        emps[i].salary = listf[4]
-                                        emps[i].attendance = listf[5]
-                                        emps[i].rating = listf[6]
-                                        emps[i].level = listf[7]
-                                        if (session["user"] == username):
-                                            session["user"] = listf[2]
-                                        if (admini and not emps[i].is_admin()):
-                                            emps[0].company.admin_id += "," + str(emps[i].id)
-                                        if (not admini and emps[i].is_admin()):
-                                            ad_list = emps[0].company.admin_id.split(",")
-                                            ad_list.remove(str(emps[i].id))
-                                            emps[0].company.admin_id = ",".join(ad_list)
-                                        check = True
-                                        db.session.commit()
-                                        break
-                                if (User.get_user_l(session['user'], emps).is_admin()):
-                                    return redirect(url_for('dashboard', name=company.name))
-                                else:
-                                    return redirect(url_for('profile', cname=company.name, name=uname))
+                                    message = "Weak password."
                             else:
                                 message = "Passwords do not match."
                         else:
@@ -278,36 +282,39 @@ def ruser(cname, status, name):
                                 password = request.form.get('password')
                                 cpassword = request.form.get('cpassword')
                                 if (pass_val(password, cpassword)):
-                                    salary = request.form.get('salary')
-                                    attendance = request.form.get('attendance')
-                                    rating = request.form.get('rating')
-                                    level = request.form.get('level')
-                                    if (not salary.isnumeric() or not attendance.isnumeric() or not rating.isnumeric() or not level.isnumeric() or not ssn.isnumeric()):
-                                        check = False
-                                    company = User.get_user_l(session['user'], emps).company
-                                    list1 = [name, ssn, password, salary, attendance, rating, level]
-                                    for j in range(len(list1)):
-                                        if (list1[j] == ""):
+                                    if (status_method(password) != "Weak"):
+                                        salary = request.form.get('salary')
+                                        attendance = request.form.get('attendance')
+                                        rating = request.form.get('rating')
+                                        level = request.form.get('level')
+                                        if (not salary.isnumeric() or not attendance.isnumeric() or not rating.isnumeric() or not level.isnumeric() or not ssn.isnumeric()):
                                             check = False
-                                    if (check):
-                                        user = User()
-                                        user.name = name
-                                        user.ssn = ssn
-                                        user.uname = uname
-                                        user.password = password
-                                        user.salary = salary
-                                        user.attendance = attendance
-                                        user.rating = rating
-                                        user.level = level
-                                        user.balance = 0.0
-                                        user.company = User.get_user_l(session['user'], emps).company
-                                        User.save_db(user, db)
-                                        if (admini):
-                                            user.company.admin_id += "," + str(user.id)
-                                        db.session.commit()
-                                        return redirect(url_for('dashboard', name = emps[0].company.name))
+                                        company = User.get_user_l(session['user'], emps).company
+                                        list1 = [name, ssn, password, salary, attendance, rating, level]
+                                        for j in range(len(list1)):
+                                            if (list1[j] == ""):
+                                                check = False
+                                        if (check):
+                                            user = User()
+                                            user.name = name
+                                            user.ssn = ssn
+                                            user.uname = uname
+                                            user.password = password
+                                            user.salary = salary
+                                            user.attendance = attendance
+                                            user.rating = rating
+                                            user.level = level
+                                            user.balance = 0.0
+                                            user.company = User.get_user_l(session['user'], emps).company
+                                            User.save_db(user, db)
+                                            if (admini):
+                                                user.company.admin_id += "," + str(user.id)
+                                            db.session.commit()
+                                            return redirect(url_for('dashboard', name = emps[0].company.name))
+                                        else:
+                                            message = "Spots empty."
                                     else:
-                                        message = "Spots empty."
+                                        message = "Weak password."
                                 else:
                                     message = "Passwords do not match."
                             else:
@@ -329,14 +336,17 @@ def uuser(cname, name):
                     password = request.form.get("password")
                     cpassword = request.form.get("cpassword")
                     if (pass_val(password, cpassword)):
-                        for i in range(len(emps)):
-                            if (emps[i].uname == username):
-                                if (name != ""):
-                                    emps[i].name = name
-                                if (password != ""):
-                                    emps[i].password = password
-                                db.session.commit()
-                                return redirect(url_for('profile', cname=company.name, name=username))
+                        if (status_method(password) != "Weak"):
+                            for i in range(len(emps)):
+                                if (emps[i].uname == username):
+                                    if (name != ""):
+                                        emps[i].name = name
+                                    if (password != ""):
+                                        emps[i].password = password
+                                    db.session.commit()
+                                    return redirect(url_for('profile', cname=company.name, name=username))
+                        else:
+                            message = "Weak Password."
                     else:
                         message = "Passwords do not match."
                 return render_template("uuser.jinja", message = message)
