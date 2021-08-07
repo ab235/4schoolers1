@@ -26,6 +26,14 @@
                         <td><a class="btn btn-primary" href="{{url_for('uuser', cname=user.company.name, name=user.uname)}}" role="button">Update Profile</a></td>
                     {% endif %}
                 </tr>
+                <tr>
+                    <td>Action:</td>
+                    {% if not s.is_admin() %}
+                        <td><a class="btn btn-primary" href="{{url_for('index')}}" role="button">Logout</a></td>
+                    {% else %}
+                        <td><a class="btn btn-primary" href="{{url_for('delete', cname = user.company.name, name=user.uname)}}" role="button">Delete User</a></td>
+                    {% endif %}
+                </tr>
           </tbody>
         </table>
     </body>
