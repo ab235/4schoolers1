@@ -1,0 +1,15 @@
+Payroll System
+
+To register a company, navigate to the home page and click the Register button. Then, enter the name of your company and amount of initial money. The name of the company must be unique. Once finished, you will be transported to the dashboard of your company.
+
+NOTICE: There will be a temporary admin account associated with your dashboard that you can use to login. Its username is root and password is 1234. It will be automatically deleted as soon as you make your first admin account.
+
+Dashboard: 
+                                                                                     Logout Add_User Check_Funds
+---------------------------------------------------------------------
+Name  Salary  Pay_Button Profile_Link
+User1 Salary1 Pay1       Profile1
+User2 Salary2 Pay2       Profile2
+...
+
+Add_User adds the employee to your company. Register this employee's name, username (must be unique), password, salary, and so on. Check_Funds enables you to check how much money is left, and add more money to your company. Each employee has a profile button and a pay button. The pay button pays the employee. The profile button takes 
