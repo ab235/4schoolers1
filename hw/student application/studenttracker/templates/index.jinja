@@ -1,0 +1,13 @@
+<html>
+	<head>
+		<title>Index Page</title>
+	</head>
+	<body>
+		<h1>StudentTracker</h1>
+		<form method="post">
+			{% csrf_token %}
+			<a href = "{% url 'student_register' %}">Register</a>
+			<a href = "{% url 'student_login' %}">Login</a>
+		</form>
+	</body>
+</html>

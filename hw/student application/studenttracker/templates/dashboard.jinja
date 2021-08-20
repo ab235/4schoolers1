@@ -1,0 +1,27 @@
+<html>
+	<head>
+		<title>Register</title>
+	</head>
+	<body>
+		<table>
+			<thead>
+				<tr>
+					<td>Student</td>
+					<td>Profile</td>
+				</tr>
+			</thead>
+			<tbody>
+				{% for student in students %}
+					<tr>
+						<td>{{student}}</td>
+						<td><a href = "{% url 'get_student' student.uname %}">Profile</a><td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<form method="post">
+			{% csrf_token %}
+			<a href = "{% url 'index' %}">Log Out</a>
+		</form>
+	</body>
+</html>

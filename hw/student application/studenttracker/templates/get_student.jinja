@@ -1,0 +1,30 @@
+<html>
+	<head>
+		<title>Get Student</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	</head>
+	<body>
+		{% if not edit %}
+			<ul>
+				{% for i in nopass %}
+					<li>{{i.0}} {{i.1}}</li>
+				{% endfor %}
+			</ul>
+		{% else %}
+			<form method="post">
+				{% csrf_token %}
+				<input type="text" name = "fn" value="{{student.fn}}">
+				<input type="text" name = "ln" value="{{student.ln}}">
+				<input type="text" name = "uname" value="{{student.uname}}">
+				<input type="text" name = "password" value="{{student.password}}">
+				<input type="text" name = "coo" value="{{student.coo}}">
+				<input type = "submit">
+			</form>
+			<form method="post">
+				{% csrf_token %}
+				<a href = "{% url 'delete_student' %}">Delete</a>
+				<a href = "{% url 'student_dashboard' %}">Dashboard</a>
+			</form>
+		{% endif %}
+	</body>
+</html>
