@@ -9,6 +9,6 @@ class Student(models.Model):
 	coo = models.CharField(max_length = 100)
 
 	def __str__(self):
-		return "Username {}: Student {} {} from {}".format(self.uname, self.fn, self.ln, self.coo)
+		return "Username {}: Student {} {}".format(self.uname, self.fn, self.ln, self.coo)
 	def __repr__(self):
-		return "Username {}: Student {} {} from {}".format(self.uname, self.fn, self.ln, self.coo)
+		return "Username {}: Student {} {}".format(self.uname, self.fn, self.ln, self.coo)

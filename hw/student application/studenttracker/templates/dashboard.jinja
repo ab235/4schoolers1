@@ -13,7 +13,7 @@
 			<tbody>
 				{% for student in students %}
 					<tr>
-						<td>{{student}}</td>
+						<td>{{student}} from <a href = "{% url 'student_country' student.coo %}">{{student.coo}}</a></td>
 						<td><a href = "{% url 'get_student' student.uname %}">Profile</a><td>
 					</tr>
 				{% endfor %}

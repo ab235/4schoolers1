@@ -89,3 +89,12 @@ def delete(request):
 	Student.objects.filter(uname=request.session['user']).delete()
 	request.session['user'] = False
 	return redirect('index')
+def get_country(request, country):
+	context = {}
+	if (request.session['user']):
+		coo = Student.objects.filter(coo=country)
+		if (coo):
+			context['country'] = country
+			context['pefrom'] = list(coo)
+			return render(request, 'get_country.jinja', context)
+	return redirect('index')

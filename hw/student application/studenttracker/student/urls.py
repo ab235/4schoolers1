@@ -10,5 +10,6 @@ urlpatterns = [
     path('login', login, name="student_login"),
     path('dashboard', dashboard, name="student_dashboard"),
     path('get_student/<ustudent>', get_student, name="get_student"),
-    path('delete', delete, name="delete_student")
+    path('delete', delete, name="delete_student"),
+    path('get_country/<country>', get_country, name="student_country"),
 ]
