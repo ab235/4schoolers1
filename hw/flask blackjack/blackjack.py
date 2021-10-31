@@ -76,8 +76,8 @@ class Game:
     def turn(self):
         card = self.deck.deal()
         self.player.add_card(card)
-
         return 'Your cards: ' + str(self.player.cards)
+        
     def game_over(self):
         if (self.player.get_sum() > 21):
             return True

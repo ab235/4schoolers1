@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import csv
 from blackjack import Card, Deck, Player, Game
 from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
@@ -14,15 +13,15 @@ class User(db.Model):
     pswrd = db.Column(db.String(80), nullable=False)
     money = db.Column(db.Integer)
 
-    def __repr__(self):
+    def __repr__(self): #print user
         return '{}: ${}'.format(self.uname, self.money)
 
     @staticmethod
-    def save_db(user, db):
+    def save_db(user, db): #adding new users to database
         db.session.add(user)
         db.session.commit()
     @staticmethod
-    def update(user, db):
+    def update(user, db): #updating information of users
         puser = User.query.filter_by(uname=user.uname).first()
         puser.uname = user.uname
         puser.pswrd = user.pswrd
@@ -30,17 +29,13 @@ class User(db.Model):
         db.session.commit()
 
     @staticmethod
-    def get_user(username, db):
+    def get_user(username, db): #return user from database
         return User.query.filter_by(uname=username).first()
                 
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
-    #if (request.form.get("Register")):
-        #return redirect(url_for('register'))
-    #elif (request.form.get("Login")):
-        #return redirect(url_for('login'))
-    session['user'] = False
+    session['user'] = False #forces a log-in to access dashboard
     return render_template('index.jinja')
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
@@ -156,16 +151,16 @@ def blackjack(username):
     else:
         return redirect(url_for('index'))
 @app.route('/catch1/<username>', methods = ['GET', 'POST'])
-def catch1(username):
+def catch1(username): #recursive function that keeps running until the game ends
     if (session['user']):
         if (not game.game_over()):
             user = User.get_user(username, db)
             session['message'] += 'Do you want to take a card: <br>'
             if (request.form.get("exit")):
                 return redirect(url_for('end_game', username = username))
-            elif (request.form.get("next")):
-                session['message'] += game.turn() + "<br>"
-                return redirect(url_for('catch1', username = username))
+            elif (request.form.get("next")): 
+                session['message'] += game.turn() + "<br>" #game.turn returns the players hand after dealing a card
+                return redirect(url_for('catch1', username = username)) #if next is clicked, refresh the page and begin the turn again
         else:
             return redirect(url_for('end_game', username = username))
         return render_template('blackjack.jinja', user = str(user), message = session['message'])
@@ -200,4 +195,4 @@ def page_not_found(e):
         return redirect(url_for('index'))
     return render_template('404.jinja'), 404
 if __name__ == '__main__':
-   app.run(use_reloader=False)
+    app.run(use_reloader=False)
